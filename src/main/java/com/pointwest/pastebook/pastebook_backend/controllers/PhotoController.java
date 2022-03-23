@@ -105,16 +105,16 @@ public class PhotoController {
     }
 
     // form/page for asking the user for an albumId input, where upon clicking the submit button, the user is directed to the list of images pertaining to the albumId inputted
-    @GetMapping("/api/tl/form/getUserId")
-    public String formGetAlbumId(Model model) {
-        Photo photo = new Photo();
-        Album album = new Album();
-        User user = new User();
-        model.addAttribute("photo", photo);
-        model.addAttribute("album", album);
-        model.addAttribute("user", user);
-        return "formGetUserId";
-    }
+//    @GetMapping("/api/tl/form/getUserId")
+//    public String formGetAlbumId(Model model) {
+//        Photo photo = new Photo();
+//        Album album = new Album();
+//        User user = new User();
+//        model.addAttribute("photo", photo);
+//        model.addAttribute("album", album);
+//        model.addAttribute("user", user);
+//        return "formGetUserId";
+//    }
 
     // displaying photos from an album with id: albumId
     @GetMapping("/api/tl/display/albums")
