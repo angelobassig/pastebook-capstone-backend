@@ -3,14 +3,20 @@ package com.pointwest.pastebook.pastebook_backend.services;
 import com.pointwest.pastebook.pastebook_backend.config.JwtToken;
 import com.pointwest.pastebook.pastebook_backend.exceptions.EntityDuplicateException;
 import com.pointwest.pastebook.pastebook_backend.exceptions.EntityNotFoundException;
+import com.pointwest.pastebook.pastebook_backend.models.Image;
 import com.pointwest.pastebook.pastebook_backend.models.User;
 import com.pointwest.pastebook.pastebook_backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
@@ -26,6 +32,10 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private JwtToken jwtToken;
 
+    @Autowired
+    private JavaMailSender mailSender;
+
+
     @Override
     public User createUser(User user) {
         Optional<User> userDb = Optional.ofNullable(userRepository.findByEmail(user.getEmail()));
@@ -34,6 +44,13 @@ public class UserServiceImpl implements UserService {
         }
         //When verified, change status to verify and set profileUrl
         userRepository.save(user);
+        try {
+            sendVerificationEmail(user, "http://localhost:4200");
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         return userRepository.save(prodVerify(user));
     }
 
@@ -76,7 +93,52 @@ public class UserServiceImpl implements UserService {
         userDb.setProfileUrl(profileUrl);
         return userRepository.save(userDb);
     }
+//
+//    public boolean verify(String verificationCode) {
+//        User user = userRepository.findByVerificationCode(verificationCode);
+//
+//        if (user == null || user.isEnabled()) {
+//            return false;
+//        } else {
+//            user.setVerificationCode(null);
+//            user.setEnabled(true);
+//            userRepository.save(user);
+//
+//            return true;
+//        }
+//
+//    }
+    // send verification email
+    private void sendVerificationEmail(User user, String siteURL)
+            throws MessagingException, UnsupportedEncodingException {
+        String toAddress = user.getEmail();
+        String fromAddress = "grp4pastebook@gmail.com";
+        String senderName = "Group 4 Pastebook";
+        String subject = "Please verify your registration";
+        String content = "Dear [[name]],<br>"
+                + "Please click the link below to verify your registration:<br>"
+                + "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
+                + "Thank you,<br>"
+                + "Your company name.";
 
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+
+        helper.setFrom(fromAddress, senderName);
+        helper.setTo(toAddress);
+        helper.setSubject(subject);
+
+        content = content.replace("[[name]]", user.getFirstName());
+        String verifyURL = siteURL + "/verify?code=" + user.getVerificationCode();
+
+        content = content.replace("[[URL]]", verifyURL);
+
+        helper.setText(content, true);
+
+        mailSender.send(message);
+
+        System.out.println("Email has been sent");
+    }
     // get users
     public ResponseEntity getUsers() {
         return new ResponseEntity(userRepository.findAll(), HttpStatus.OK);
@@ -132,6 +194,15 @@ public class UserServiceImpl implements UserService {
         } else {
             return new ResponseEntity("You are not authorized to edit this aboutMe", HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    @Override
+    public ResponseEntity uploadProfilePicture(Image image, String token) {
+        //System.out.println("Upload image test");
+        User user = userRepository.getById(Long.parseLong(jwtToken.getIdFromToken(token)));
+        user.setImage(image);
+        userRepository.save(user);
+        return new ResponseEntity("Upload Success", HttpStatus.OK);
     }
 
     // search user

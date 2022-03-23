@@ -44,6 +44,7 @@ public class CommentServiceImpl implements CommentService{
             User user = userRepository.findById(authenticatedId).get();
             comment.setUser(user);
             comment.setContent(content);
+            commentRepository.save(comment);
             post.getComments().add(comment);
             postRepository.save(post);
 

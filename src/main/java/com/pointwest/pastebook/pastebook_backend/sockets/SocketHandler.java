@@ -62,18 +62,18 @@ public class SocketHandler extends TextWebSocketHandler {
        // System.out.println("Active sessions: "+ sessions.size());
     }
 
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        // do something on connection closed
-        sessions.remove(session);
-        String id = getIdFromConnections(session);
-        System.out.println(id);
-        if(id!=null){
-            userService.setOfflineStatus(Long.parseLong(id));
-           // System.out.println("user id " + id + " has disconnected");
-        }
-
-    }
+//    @Override
+//    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+//        // do something on connection closed
+//        sessions.remove(session);
+//        String id = getIdFromConnections(session);
+//        System.out.println(id);
+//        if(id!=null){
+//            userService.setOfflineStatus(Long.parseLong(id));
+//           // System.out.println("user id " + id + " has disconnected");
+//        }
+//
+//    }
 
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {

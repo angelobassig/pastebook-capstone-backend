@@ -24,18 +24,18 @@ public class PostController {
 
   @PostMapping
   public ResponseEntity<Object> createPost(
-      @RequestParam(value = "content", required = false) String content,
-      @RequestParam(value = "tagged", required = false) List<Long> id,
-      @RequestPart(value = "image", required = false) MultipartFile imageFile,
-      @RequestHeader("Authorization") String token)
-      throws IOException {
+          @RequestParam(value = "content", required = false) String content,
+          @RequestParam(value = "tagged", required = false) Long id,
+          @RequestPart(value = "image", required = false) MultipartFile imageFile,
+          @RequestHeader("Authorization") String token)
+          throws IOException {
     Post post = new Post();
     if (imageFile != null) {
       Image image =
-          new Image(
-              StringUtils.cleanPath(Objects.requireNonNull(imageFile.getOriginalFilename())),
-              imageFile.getContentType(),
-              imageFile.getBytes());
+              new Image(
+                      StringUtils.cleanPath(Objects.requireNonNull(imageFile.getOriginalFilename())),
+                      imageFile.getContentType(),
+                      imageFile.getBytes());
       post.setImage(image);
     }
 
@@ -59,7 +59,7 @@ public class PostController {
   // GET /api/posts/user
   @GetMapping("/user")
   public ResponseEntity<Iterable<Post>> getPostFromUser(
-      @RequestHeader(value = "Authorization") String token) {
+          @RequestHeader(value = "Authorization") String token) {
     return ResponseEntity.ok().body(postService.getPostsFromUser(token));
   }
 
@@ -72,33 +72,32 @@ public class PostController {
   // GET /api/posts
   @GetMapping("/friends/{userId}")
   public ResponseEntity<List<Post>> getPostWithFriends(
-      @PathVariable Long userId,
-      @RequestParam("page") Integer page,
-      @RequestParam("size") Integer size,
-      @RequestHeader("Authorization") String token) {
+          @PathVariable Long userId,
+          @RequestParam("page") Integer page,
+          @RequestParam("size") Integer size) {
     return ResponseEntity.ok().body(postService.getPostOfFriends(userId, page, size));
   }
 
   @GetMapping("/pagination")
   public ResponseEntity<Object> getPostsWithPagination(
-      @RequestParam(value = "page") Integer page, @RequestParam(value = "size") Integer size) {
+          @RequestParam(value = "page") Integer page, @RequestParam(value = "size") Integer size) {
     return ResponseEntity.ok().body(postService.getPostsPagination(page, size));
   }
 
   // UPDATE /api/posts/id
   @PutMapping("/{postId}")
   public ResponseEntity<Post> updatePosts(
-      @PathVariable Long postId,
-      @RequestParam(value = "image", required = false) MultipartFile imageFile,
-      @RequestParam(value = "content") String content)
-      throws IOException {
+          @PathVariable Long postId,
+          @RequestParam(value = "image", required = false) MultipartFile imageFile,
+          @RequestParam(value = "content") String content)
+          throws IOException {
     Post post = new Post();
     if (imageFile != null) {
       Image image =
-          new Image(
-              StringUtils.cleanPath(Objects.requireNonNull(imageFile.getOriginalFilename())),
-              imageFile.getContentType(),
-              imageFile.getBytes());
+              new Image(
+                      StringUtils.cleanPath(Objects.requireNonNull(imageFile.getOriginalFilename())),
+                      imageFile.getContentType(),
+                      imageFile.getBytes());
       post.setImage(image);
     }
 
